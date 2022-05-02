@@ -2,18 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Animator))]
 public class Enemy : MonoBehaviour
 {
-    [System.Serializable]
-    public enum State
-    {
-        IDLE,
-        CHASE,
-        ATTACK
-    }
-
-    public State playerState;
     Transform player;
     Animator anim;
     SpriteRenderer sr;
@@ -23,46 +13,23 @@ public class Enemy : MonoBehaviour
 
     void Start()
     {
-        player = FindObjectOfType<Player>().transform;
+        player = FindObjectOfType<PlayerMovement>().transform;
         sr = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
-        playerState = State.IDLE;
     }
 
     void Update()
     {
+        Idle();
         //Chase();
+        //Attack();
         FacePlayer();
-        switch(playerState)
-        {
-            case State.IDLE:
-                Idle();
-                break;
-            case State.CHASE:
-                Chase();
-                break;
-            case State.ATTACK:
-                Attack();
-                break;
-        }
     }
 
     void Idle()
     {
         anim.SetBool("attack", false);
         anim.SetBool("chase", false);
-
-        if(Vector3.Distance(transform.position, player.position) <= attackDistance)
-        {
-            playerState = State.ATTACK;
-            return;
-        }
-           
-        if(Vector3.Distance(transform.position, player.position) <= aggroRange)
-        {
-            playerState = State.CHASE;
-            return;
-        }
     }
 
     void Chase()
@@ -77,19 +44,12 @@ public class Enemy : MonoBehaviour
             direction = Vector3.left;
         
         transform.Translate(direction * speed * Time.deltaTime);
-        
-        if(Vector3.Distance(transform.position, player.position) <= attackDistance)
-            playerState = State.ATTACK;
-        if(Vector3.Distance(transform.position, player.position) >= aggroRange)
-            playerState = State.IDLE;
     }
 
     void Attack()
     {
         anim.SetBool("chase", false);
         anim.SetBool("attack", true);
-        if(Vector3.Distance(transform.position, player.position) >= attackDistance)
-            playerState = State.CHASE;
     }
 
     void FacePlayer()
